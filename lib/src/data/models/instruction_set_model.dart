@@ -1,4 +1,4 @@
-import '../../domain/entities/instruction_set.dart';
+﻿import '../../domain/entities/instruction_set.dart';
 
 class InstructionSetModel {
   const InstructionSetModel({
@@ -23,6 +23,13 @@ class InstructionSetModel {
       category: json['category'] as String?,
     );
   }
+
+  factory InstructionSetModel.fromEntity(InstructionSet set) => InstructionSetModel(
+        id: set.id,
+        title: set.title,
+        steps: set.steps,
+        category: set.category,
+      );
 
   InstructionSet toEntity() => InstructionSet(
         id: id,

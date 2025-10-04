@@ -1,4 +1,4 @@
-name: lib
+﻿name: lib
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,6 +34,16 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  google_fonts: ^6.2.1
+  flutter_riverpod: ^2.5.1
+  dio: ^5.4.0
+  connectivity_plus: ^6.0.3
+  flutter_secure_storage: ^9.2.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.4
+  logger: ^2.0.2+1
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +54,8 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
   flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the

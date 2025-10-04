@@ -1,37 +1,38 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+
+import '../../../../app/router/routes.dart';
+import '../../../../shared/widgets/custom_textfield.dart';
+import '../widgets/auth_scaffold.dart';
 
 class PhoneEntryScreen extends StatelessWidget {
   const PhoneEntryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Verify Phone Number')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'We will send a one-time password to your phone.',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Phone Number',
-                prefixText: '+',
-              ),
-              keyboardType: TextInputType.phone,
-            ),
-            const Spacer(),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pushNamed('/verify-phone'),
-              child: const Text('Send Code'),
-            ),
-          ],
+    return AuthScaffold(
+      title: 'Verify your phone',
+      subtitle: 'We will send a one-time passcode to authenticate your number.',
+      children: [
+        AppTextField(
+          label: 'Country code',
+          hint: '+1',
+          keyboardType: TextInputType.phone,
+          prefix: const Icon(Icons.flag_outlined),
         ),
-      ),
+        const SizedBox(height: 20),
+        AppTextField(
+          label: 'Phone number',
+          hint: '512 555 0147',
+          keyboardType: TextInputType.phone,
+          prefix: const Icon(Icons.phone_outlined),
+        ),
+        const SizedBox(height: 24),
+        AuthSubmit(
+          label: 'Send code',
+          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.verifyPhone),
+        ),
+      ],
     );
   }
 }
+
