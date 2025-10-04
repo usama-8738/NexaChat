@@ -6,7 +6,14 @@ import '../../config/app_config.dart';
 import '../../core/network/network_info.dart';
 import '../../core/utils/logger.dart';
 import '../../data/datasources/local/secure_store.dart';
+import '../../data/datasources/local/session_store.dart';
+import '../../data/datasources/remote/auth_remote_datasource.dart';
+import '../../data/datasources/remote/impl/auth_remote_datasource_impl.dart';
 import '../../data/datasources/remote/nexa_api_client.dart';
+import '../../data/local/cache_database.dart';
+import '../../data/network/auth_interceptor.dart';
+import '../../data/repositories/auth_repository_impl.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../services/analytics/analytics_service.dart';
 import '../../services/monitoring/error_reporting_service.dart';
 import '../../services/notifications/push_notification_service.dart';
@@ -21,10 +28,25 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) {
   return ConnectivityNetworkInfo(connectivity);
 });
 
+final secureStoreProvider = Provider<SecureStore>((_) => SecureStore());
+
+final sessionStoreProvider = Provider<SessionStore>((ref) {
+  final secureStore = ref.watch(secureStoreProvider);
+  return SessionStore(secureStore);
+});
+
+final cacheDatabaseProvider = Provider<CacheDatabase>((_) => CacheDatabase());
+
+final authInterceptorProvider = Provider<AuthInterceptor>((ref) {
+  final sessionStore = ref.watch(sessionStoreProvider);
+  return AuthInterceptor(sessionStore);
+});
+
 final dioProvider = Provider<Dio>((ref) {
   final config = ref.watch(appConfigProvider);
   final options = NexaApiClient.defaultOptions(config.baseApiUrl);
   final dio = Dio(options);
+  dio.interceptors.add(ref.watch(authInterceptorProvider));
   dio.interceptors.add(
     LogInterceptor(
       requestBody: false,
@@ -40,8 +62,6 @@ final apiClientProvider = Provider<NexaApiClient>((ref) {
   return NexaApiClient(dio);
 });
 
-final secureStoreProvider = Provider<SecureStore>((_) => SecureStore());
-
 final analyticsServiceProvider = Provider<AnalyticsService>((_) => const NoopAnalyticsService());
 
 final errorReportingServiceProvider = Provider<ErrorReportingService>((_) => const NoopErrorReportingService());
@@ -49,3 +69,14 @@ final errorReportingServiceProvider = Provider<ErrorReportingService>((_) => con
 final pushNotificationServiceProvider = Provider<PushNotificationService>((_) => const NoopPushNotificationService());
 
 final cloudStorageServiceProvider = Provider<CloudStorageService>((_) => const NoopCloudStorageService());
+
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  final client = ref.watch(apiClientProvider);
+  final sessionStore = ref.watch(sessionStoreProvider);
+  return AuthRemoteDataSourceImpl(client, sessionStore);
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final remote = ref.watch(authRemoteDataSourceProvider);
+  return AuthRepositoryImpl(remote);
+});

@@ -1,4 +1,4 @@
-import '../../domain/entities/user_profile.dart';
+﻿import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
 import '../models/user_profile_model.dart';
@@ -9,9 +9,7 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
 
   @override
-  Future<void> logout() {
-    throw UnimplementedError();
-  }
+  Future<void> logout() => _remoteDataSource.logout();
 
   @override
   Future<UserProfile> login({required String email, required String password}) async {
@@ -55,3 +53,4 @@ class AuthRepositoryImpl implements AuthRepository {
     yield current?.toEntity();
   }
 }
+
