@@ -1,4 +1,4 @@
-import '../entities/subscription_plan.dart';
+﻿import '../entities/subscription_plan.dart';
 import '../repositories/subscription_repository.dart';
 
 class GetSubscriptionPlans {
@@ -6,7 +6,5 @@ class GetSubscriptionPlans {
 
   final SubscriptionRepository _repository;
 
-  Future<List<SubscriptionPlan>> call() {
-    return _repository.fetchPlans();
-  }
+  Future<List<SubscriptionPlan>> call() => _repository.fetchPlans();
 }

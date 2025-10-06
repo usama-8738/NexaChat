@@ -1,4 +1,4 @@
-import '../entities/user_profile.dart';
+﻿import '../entities/user_profile.dart';
 import '../repositories/auth_repository.dart';
 
 class LoginUser {

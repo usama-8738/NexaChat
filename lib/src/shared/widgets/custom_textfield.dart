@@ -17,6 +17,9 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.readOnly = false,
     this.textInputAction,
+    this.validator,
+    this.onChanged,
+    this.focusNode,
   });
 
   final String label;
@@ -31,6 +34,9 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final bool readOnly;
   final TextInputAction? textInputAction;
+  final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +53,17 @@ class AppTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        TextField(
+        TextFormField(
           controller: controller,
+          focusNode: focusNode,
           obscureText: obscureText,
           keyboardType: keyboardType,
           maxLines: obscureText ? 1 : maxLines,
           onTap: onTap,
           readOnly: readOnly,
           textInputAction: textInputAction,
+          validator: validator,
+          onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: prefix != null
@@ -141,7 +150,7 @@ class _AppOtpFieldState extends State<AppOtpField> {
       children: List.generate(widget.length, (index) {
         return SizedBox(
           width: 56,
-          child: TextField(
+          child: TextFormField(
             controller: _controllers[index],
             focusNode: _focusNodes[index],
             maxLength: 1,

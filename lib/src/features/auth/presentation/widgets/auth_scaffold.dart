@@ -75,18 +75,24 @@ class AuthScaffold extends StatelessWidget {
 }
 
 class AuthSubmit extends StatelessWidget {
-  const AuthSubmit({super.key, required this.label, required this.onPressed});
+  const AuthSubmit({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.isLoading = false,
+  });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return AppButton(
       label: label,
       onPressed: onPressed,
-      trailing: const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+      isLoading: isLoading,
+      trailing: isLoading ? null : const Icon(Icons.arrow_forward_rounded, color: Colors.white),
     );
   }
 }
-

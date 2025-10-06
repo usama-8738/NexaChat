@@ -1,4 +1,4 @@
-class PaymentMethod {
+﻿class PaymentMethod {
   const PaymentMethod({
     required this.id,
     required this.maskedNumber,

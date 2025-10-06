@@ -1,3 +1,4 @@
+﻿import '../../domain/entities/subscription.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/repositories/subscription_repository.dart';
 import '../datasources/remote/subscription_remote_datasource.dart';
@@ -10,6 +11,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<void> cancelSubscription() {
     return _remoteDataSource.cancelSubscription();
+  }
+
+  @override
+  Future<Subscription?> fetchCurrentSubscription() async {
+    final model = await _remoteDataSource.fetchCurrentSubscription();
+    return model?.toEntity();
   }
 
   @override

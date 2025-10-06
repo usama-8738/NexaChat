@@ -1,4 +1,4 @@
-import '../entities/payment_method.dart';
+﻿import '../entities/payment_method.dart';
 import '../repositories/payment_repository.dart';
 
 class GetPaymentMethods {
@@ -6,7 +6,5 @@ class GetPaymentMethods {
 
   final PaymentRepository _repository;
 
-  Future<List<PaymentMethod>> call() {
-    return _repository.fetchPaymentMethods();
-  }
+  Future<List<PaymentMethod>> call() => _repository.fetchPaymentMethods();
 }

@@ -37,25 +37,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> logout() async {
-    // TODO(auth): Call API logout endpoint when available.
-    await _sessionStore.clear();
+  Future<UserProfileModel> loginWithProvider({
+    required String provider,
+    required String accessToken,
+  }) async {
+    final payload = await _client.postJson(
+      ApiEndpoints.loginOauthProvider(provider),
+      data: {'access_token': accessToken},
+    );
+    await _persistSession(payload);
+    return UserProfileModel.fromJson(_extractUser(payload));
   }
-
-  @override
-  Future<void> requestPasswordReset({required String email}) => _client.postVoid(
-        ApiEndpoints.passwordResetRequest,
-        data: {'email': email},
-      );
-
-  @override
-  Future<void> resetPassword({required String token, required String newPassword}) => _client.postVoid(
-        ApiEndpoints.passwordReset,
-        data: {
-          'token': token,
-          'password': newPassword,
-        },
-      );
 
   @override
   Future<UserProfileModel> register({
@@ -76,6 +68,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<void> logout() async {
+    try {
+      await _client.postVoid(ApiEndpoints.logout);
+    } catch (error) {
+      AppLogger.warn('Logout endpoint failed: $error');
+    }
+    await _sessionStore.clear();
+  }
+
+  @override
+  Future<void> requestPasswordReset({required String email}) => _client.postVoid(
+        ApiEndpoints.passwordResetRequest,
+        data: {'email': email},
+      );
+
+  @override
+  Future<void> resetPassword({required String token, required String newPassword}) => _client.postVoid(
+        ApiEndpoints.passwordReset,
+        data: {
+          'token': token,
+          'password': newPassword,
+        },
+      );
+
+  @override
   Future<void> verifyCode({required String code, required bool isPhoneFlow}) => _client.postVoid(
         ApiEndpoints.verifyCode,
         data: {
@@ -83,6 +100,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'channel': isPhoneFlow ? 'sms' : 'email',
         },
       );
+
+  @override
+  Future<UserProfileModel?> refreshSession() async {
+    final refreshToken = await _sessionStore.readRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return null;
+    }
+    final payload = await _client.postJson(
+      ApiEndpoints.refresh,
+      data: {'refresh_token': refreshToken},
+    );
+    await _persistSession(payload);
+    if (!payload.containsKey('user')) {
+      return null;
+    }
+    return UserProfileModel.fromJson(_extractUser(payload));
+  }
 
   Future<void> _persistSession(Map<String, dynamic> payload) async {
     final tokens = payload['tokens'] as Map<String, dynamic>?;
@@ -112,5 +146,3 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     return user;
   }
 }
-
-

@@ -1,7 +1,12 @@
+﻿import '../entities/oauth_provider.dart';
 import '../entities/user_profile.dart';
 
 abstract class AuthRepository {
   Future<UserProfile> login({required String email, required String password});
+  Future<UserProfile> loginWithProvider({
+    required OAuthProvider provider,
+    required String accessToken,
+  });
   Future<UserProfile> register({
     required String email,
     required String password,
@@ -11,5 +16,6 @@ abstract class AuthRepository {
   Future<void> resetPassword({required String token, required String newPassword});
   Future<void> verifyCode({required String code, required bool isPhoneFlow});
   Stream<UserProfile?> watchCurrentUser();
+  Future<UserProfile?> refreshSession();
   Future<void> logout();
 }

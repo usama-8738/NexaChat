@@ -8,12 +8,20 @@ import '../../core/utils/logger.dart';
 import '../../data/datasources/local/secure_store.dart';
 import '../../data/datasources/local/session_store.dart';
 import '../../data/datasources/remote/auth_remote_datasource.dart';
+import '../../data/datasources/remote/payment_remote_datasource.dart';
+import '../../data/datasources/remote/subscription_remote_datasource.dart';
 import '../../data/datasources/remote/impl/auth_remote_datasource_impl.dart';
+import '../../data/datasources/remote/impl/payment_remote_datasource_impl.dart';
+import '../../data/datasources/remote/impl/subscription_remote_datasource_impl.dart';
 import '../../data/datasources/remote/nexa_api_client.dart';
 import '../../data/local/cache_database.dart';
 import '../../data/network/auth_interceptor.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/payment_repository_impl.dart';
+import '../../data/repositories/subscription_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/payment_repository.dart';
+import '../../domain/repositories/subscription_repository.dart';
 import '../../services/analytics/analytics_service.dart';
 import '../../services/monitoring/error_reporting_service.dart';
 import '../../services/notifications/push_notification_service.dart';
@@ -76,7 +84,27 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSourceImpl(client, sessionStore);
 });
 
+final subscriptionRemoteDataSourceProvider = Provider<SubscriptionRemoteDataSource>((ref) {
+  final client = ref.watch(apiClientProvider);
+  return SubscriptionRemoteDataSourceImpl(client);
+});
+
+final paymentRemoteDataSourceProvider = Provider<PaymentRemoteDataSource>((ref) {
+  final client = ref.watch(apiClientProvider);
+  return PaymentRemoteDataSourceImpl(client);
+});
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final remote = ref.watch(authRemoteDataSourceProvider);
   return AuthRepositoryImpl(remote);
+});
+
+final subscriptionRepositoryProvider = Provider<SubscriptionRepository>((ref) {
+  final remote = ref.watch(subscriptionRemoteDataSourceProvider);
+  return SubscriptionRepositoryImpl(remote);
+});
+
+final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
+  final remote = ref.watch(paymentRemoteDataSourceProvider);
+  return PaymentRepositoryImpl(remote);
 });

@@ -14,6 +14,7 @@ class AppButton extends StatefulWidget {
     this.trailing,
     this.expand = true,
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+    this.isLoading = false,
   });
 
   final String label;
@@ -23,6 +24,7 @@ class AppButton extends StatefulWidget {
   final Widget? trailing;
   final bool expand;
   final EdgeInsetsGeometry padding;
+  final bool isLoading;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -72,35 +74,49 @@ class _AppButtonState extends State<AppButton> {
       fontWeight: FontWeight.w600,
     );
 
-    final child = Row(
-      mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (widget.leading != null) ...[
-          widget.leading!,
-          const SizedBox(width: 12),
-        ],
-        Flexible(
-          child: Text(
-            widget.label,
-            style: labelStyle,
-            overflow: TextOverflow.ellipsis,
-          ),
+    final Widget child;
+    if (widget.isLoading) {
+      child = SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(_foregroundColor()),
         ),
-        if (widget.trailing != null) ...[
-          const SizedBox(width: 12),
-          widget.trailing!,
+      );
+    } else {
+      child = Row(
+        mainAxisSize: widget.expand ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (widget.leading != null) ...[
+            widget.leading!,
+            const SizedBox(width: 12),
+          ],
+          Flexible(
+            child: Text(
+              widget.label,
+              style: labelStyle,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (widget.trailing != null) ...[
+            const SizedBox(width: 12),
+            widget.trailing!,
+          ],
         ],
-      ],
-    );
+      );
+    }
+
+    final bool isDisabled = widget.onPressed == null || widget.isLoading;
 
     return AnimatedScale(
       duration: const Duration(milliseconds: 150),
       curve: Curves.easeOut,
-      scale: _pressed ? 0.98 : 1,
+      scale: _pressed && !isDisabled ? 0.98 : 1,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 150),
-        opacity: widget.onPressed == null ? 0.6 : 1,
+        opacity: isDisabled ? 0.6 : 1,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: _backgroundColor(),
@@ -119,14 +135,14 @@ class _AppButtonState extends State<AppButton> {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: widget.onPressed,
+              onTap: isDisabled ? null : widget.onPressed,
               onTapDown: (_) => setState(() => _pressed = true),
               onTapCancel: () => setState(() => _pressed = false),
               onTapUp: (_) => setState(() => _pressed = false),
               borderRadius: BorderRadius.circular(20),
               child: Padding(
                 padding: widget.padding,
-                child: child,
+                child: Center(child: child),
               ),
             ),
           ),
