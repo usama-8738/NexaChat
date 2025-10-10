@@ -12,6 +12,7 @@ class AddPaymentMethod {
     required int expiryMonth,
     required int expiryYear,
     required String cvv,
+    bool setDefault = false,
   }) {
     return _repository.addPaymentMethod(
       cardNumber: cardNumber,
@@ -19,6 +20,7 @@ class AddPaymentMethod {
       expiryMonth: expiryMonth,
       expiryYear: expiryYear,
       cvv: cvv,
+      setDefault: setDefault,
     );
   }
 }

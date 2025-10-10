@@ -8,6 +8,7 @@ abstract class PaymentRepository {
     required int expiryMonth,
     required int expiryYear,
     required String cvv,
+    bool setDefault = false,
   });
   Future<void> removePaymentMethod(String id);
   Future<void> setDefaultPaymentMethod(String id);

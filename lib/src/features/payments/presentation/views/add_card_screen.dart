@@ -1,21 +1,62 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/widgets/custom_textfield.dart';
 import '../../../../shared/widgets/page_header.dart';
+import '../../application/payment_methods_providers.dart';
 
-class AddCardScreen extends StatefulWidget {
+class AddCardScreen extends ConsumerStatefulWidget {
   const AddCardScreen({super.key});
 
   @override
-  State<AddCardScreen> createState() => _AddCardScreenState();
+  ConsumerState<AddCardScreen> createState() => _AddCardScreenState();
 }
 
-class _AddCardScreenState extends State<AddCardScreen> {
+class _AddCardScreenState extends ConsumerState<AddCardScreen> {
   bool _setAsDefault = true;
+  final _cardController = TextEditingController();
+  final _holderController = TextEditingController();
+  final _expiryController = TextEditingController();
+  final _cvcController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listen(paymentMethodsNotifierProvider, (previous, next) {
+      if (!mounted) return;
+      final wasAdding = previous?.isAdding == true && previous?.isProcessing == true;
+      final finishedAdding = previous?.isAdding == true && next.isAdding == false;
+      if (next.failure != null && next.failure != previous?.failure) {
+        _showMessage(next.failure!.message);
+      } else if (wasAdding && finishedAdding && next.failure == null) {
+        _showMessage('Card added successfully');
+        Navigator.of(context).maybePop();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _cardController.dispose();
+    _holderController.dispose();
+    _expiryController.dispose();
+    _cvcController.dispose();
+    super.dispose();
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(paymentMethodsNotifierProvider);
+    final notifier = ref.read(paymentMethodsNotifierProvider.notifier);
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -44,6 +85,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
                   AppTextField(
                     label: 'Card number',
                     hint: '5698 5626 6786 9979',
+                    controller: _cardController,
                     keyboardType: TextInputType.number,
                     prefix: const Icon(Icons.credit_card),
                   ),
@@ -51,24 +93,27 @@ class _AddCardScreenState extends State<AddCardScreen> {
                   AppTextField(
                     label: 'Card holder',
                     hint: 'Tom Hillson',
+                    controller: _holderController,
                     prefix: const Icon(Icons.person_outline),
                   ),
                   const SizedBox(height: 16),
                   Row(
-                    children: const [
+                    children: [
                       Expanded(
                         child: AppTextField(
                           label: 'Expiration date',
                           hint: '05 / 26',
-                          prefix: Icon(Icons.calendar_today_outlined),
+                          controller: _expiryController,
+                          prefix: const Icon(Icons.calendar_today_outlined),
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: AppTextField(
                           label: 'CVC',
                           hint: '231',
-                          prefix: Icon(Icons.lock_outline),
+                          controller: _cvcController,
+                          prefix: const Icon(Icons.lock_outline),
                         ),
                       ),
                     ],
@@ -90,12 +135,50 @@ class _AddCardScreenState extends State<AddCardScreen> {
             const SizedBox(height: 24),
             AppButton(
               label: 'Save card',
-              onPressed: () {},
+              isLoading: state.isAdding && state.isProcessing,
+              onPressed: state.isProcessing
+                  ? null
+                  : () async {
+                      final card = _cardController.text.trim();
+                      final holder = _holderController.text.trim();
+                      final expiry = _expiryController.text.trim();
+                      final cvc = _cvcController.text.trim();
+
+                      final parsed = _parseExpiry(expiry);
+                      if (parsed == null) {
+                        _showMessage('Invalid expiry. Use MM/YY');
+                        return;
+                      }
+                      if (card.isEmpty || holder.isEmpty || cvc.isEmpty) {
+                        _showMessage('Please fill all fields');
+                        return;
+                      }
+
+                      await notifier.addPaymentMethod(
+                        cardNumber: card,
+                        holderName: holder,
+                        expiryMonth: parsed.$1,
+                        expiryYear: parsed.$2,
+                        cvv: cvc,
+                        setDefault: _setAsDefault,
+                      );
+                    },
             ),
           ],
         ),
       ),
     );
+  }
+
+  (int, int)? _parseExpiry(String value) {
+    final cleaned = value.replaceAll(' ', '').replaceAll('-', '').replaceAll('/', '');
+    if (cleaned.length < 4) return null;
+    final mm = int.tryParse(cleaned.substring(0, 2));
+    final yy = int.tryParse(cleaned.substring(2, 4));
+    if (mm == null || yy == null) return null;
+    if (mm < 1 || mm > 12) return null;
+    final fullYear = 2000 + yy;
+    return (mm, fullYear);
   }
 }
 
@@ -188,4 +271,3 @@ class _CardField extends StatelessWidget {
     );
   }
 }
-

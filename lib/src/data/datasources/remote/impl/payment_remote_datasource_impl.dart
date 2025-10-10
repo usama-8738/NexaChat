@@ -16,6 +16,7 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
     required int expiryMonth,
     required int expiryYear,
     required String cvv,
+    bool setDefault = false,
   }) async {
     final payload = await _client.postJson(
       ApiEndpoints.paymentMethods,
@@ -25,6 +26,7 @@ class PaymentRemoteDataSourceImpl implements PaymentRemoteDataSource {
         'expiry_month': expiryMonth,
         'expiry_year': expiryYear,
         'cvv': cvv,
+        'set_default': setDefault,
       },
     );
     return PaymentMethodModel.fromJson(payload);

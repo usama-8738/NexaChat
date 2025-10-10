@@ -14,6 +14,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
     required int expiryMonth,
     required int expiryYear,
     required String cvv,
+    bool setDefault = false,
   }) async {
     final model = await _remoteDataSource.addPaymentMethod(
       cardNumber: cardNumber,
@@ -21,6 +22,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
       expiryMonth: expiryMonth,
       expiryYear: expiryYear,
       cvv: cvv,
+      setDefault: setDefault,
     );
     return model.toEntity();
   }
